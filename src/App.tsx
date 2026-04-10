@@ -7,7 +7,7 @@ import {
 import { useEffect, useState, createContext, useContext } from 'react';
 
 // তোমার কম্পিউটারের ছবি ইম্পোর্ট করা হলো
-import principalSirPhoto from './assets/principal_sir.jpg';
+import principalSirPhoto from './assets/principal_sir.jpg.jpg';
 
 // --- contexts ---
 const LanguageContext = createContext({ lang: "bn", toggleLang: () => {} });
