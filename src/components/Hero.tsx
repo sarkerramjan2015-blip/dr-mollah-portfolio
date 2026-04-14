@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShieldCheck, BookOpen, Mail, Trophy } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FadeIn } from './FadeIn';
 
-const principalSirPhoto = "https://picsum.photos/seed/principal/800/1000";
+// 👇 তোমার লোকাল ফোল্ডার থেকে স্যারের ছবি
+import principalSirPhoto from '../asset/sir heroic poster.png';
 
 const HERO_ROLES = {
   bn: [
@@ -32,21 +32,31 @@ export function Hero({ setSelectedImg }: { setSelectedImg: (img: string) => void
   }, [roles.length]);
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center pt-24 pb-12">
-      <div className="container mx-auto px-8 max-w-7xl flex flex-col lg:flex-row items-center">
-       
-        {/* Left Column */}
-        <div className="flex-[1.8] text-center lg:text-left lg:pr-32 order-2 lg:order-1">
-          <FadeIn className="flex items-center justify-center lg:justify-start gap-3 mb-6">
-             <ShieldCheck className="text-[#C9A227]" size={18} />
-             <span className="text-[#C9A227] text-[10px] font-black tracking-[0.6em] uppercase italic">National Educational Architect</span>
-          </FadeIn>
-         
+    <section id="home" className="relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden">
+      <div className="container mx-auto px-8 max-w-7xl flex flex-col lg:flex-row items-center gap-12 lg:gap-0">
+        
+        {/* ======================================= */}
+        {/* বাম দিকের কলাম: টেক্সট (বাম থেকে ডান দিকে আসবে) */}
+        {/* ======================================= */}
+        <motion.div 
+          initial={{ x: -100, opacity: 0 }} 
+          animate={{ x: 0, opacity: 1 }} 
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="flex-[1.8] text-center lg:text-left lg:pr-32 order-2 lg:order-1"
+        >
+          {/* গ্লাস শেপের ভেতরে "National Educational Architect" (শাইনিং বর্ডারসহ) */}
+          <div className="flex justify-center lg:justify-start mb-8">
+            <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-white/5 backdrop-blur-xl border border-[#C9A227]/40 shadow-[0_0_20px_rgba(201,162,39,0.2)]">
+               <ShieldCheck className="text-[#C9A227]" size={18} />
+               <span className="text-[#C9A227] text-[10px] font-black tracking-[0.4em] uppercase italic">National Educational Architect</span>
+            </div>
+          </div>
+          
           <h1 className="text-6xl md:text-8xl lg:text-[110px] font-serif font-black text-white leading-[0.85] tracking-tighter mb-10">
             DR. MAHBUBUR <br />
             <span className="bg-gradient-to-r from-[#C9A227] via-[#FFD700] to-[#F5E6C8] bg-clip-text text-transparent">RAHMAN MOLLAH</span>
           </h1>
-         
+          
           <div className="h-16 overflow-hidden bg-white/5 backdrop-blur-md border border-white/5 rounded-2xl px-8 flex items-center max-w-max mx-auto lg:mx-0 shadow-xl mb-12">
             <AnimatePresence mode="wait">
               <motion.p key={roleIndex} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}
@@ -66,49 +76,63 @@ export function Hero({ setSelectedImg }: { setSelectedImg: (img: string) => void
               <Mail size={20} /> GET IN TOUCH
             </a>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Right Column */}
-        <div className="flex-1 relative flex justify-center lg:justify-end order-1 lg:order-2 mb-16 lg:mb-0">
-           <FadeIn delay={0.3} className="relative">
-              <div className="relative w-80 h-80 md:w-[500px] md:h-[500px] mx-auto group cursor-pointer" onClick={() => setSelectedImg(principalSirPhoto)}>
-               
-                {/* Glowing Aura */}
-                <div className="absolute inset-0 bg-[#C9A227]/20 rounded-full blur-[100px] animate-pulse" />
-               
-                {/* Rotating Dashed Ring */}
-                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-                  className="absolute -inset-8 border-[1.5px] border-dashed border-[#C9A227]/30 rounded-full"
-                />
-               
-                {/* Main Image Container */}
-                <div className="relative w-full h-full rounded-full border-[15px] border-[#04060b] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] z-10">
-                  <img
-                    src={principalSirPhoto}
-                    alt="Dr. Mahbubur Rahman Mollah"
-                    className="w-full h-full object-cover scale-110 group-hover:scale-125 transition-transform duration-1000"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#04060b]/40 to-transparent" />
+        {/* ======================================= */}
+        {/* ডান দিকের কলাম: ছবি (ডান থেকে বাম দিকে আসবে) */}
+        {/* ======================================= */}
+        <motion.div 
+          initial={{ x: 100, opacity: 0 }} 
+          animate={{ x: 0, opacity: 1 }} 
+          transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+          className="flex-1 relative flex justify-center lg:justify-end order-1 lg:order-2 w-full max-w-[360px] md:max-w-[420px] mx-auto"
+        >
+              
+          {/* aspect-[3/4] চতুর্ভুজ পোর্ট্রেট ফ্রেম */}
+          <div className="relative aspect-[3/4] group cursor-pointer w-full" onClick={() => setSelectedImg(principalSirPhoto)}>
+            
+            {/* পেছনের সোনালী আলোর আভা */}
+            <div className="absolute inset-0 bg-[#C9A227]/20 rounded-[2.5rem] blur-[80px] animate-pulse" />
+            
+            {/* 🌟 ৪ রঙের মুভিং ডট ম্যাজিক (স্লো স্পিড) 🌟 */}
+            <div className="absolute -inset-[3px] rounded-[2.5rem] overflow-hidden bg-white/5">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 12, ease: "linear" }} // duration 12 মানে একদম স্লো ঘুরবে
+                className="w-[200%] h-[200%] absolute top-[-50%] left-[-50%] opacity-80 bg-[conic-gradient(from_0deg,transparent_0_60deg,#C9A227_90deg,transparent_90deg_150deg,#6366F1_180deg,transparent_180deg_240deg,#10B981_270deg,transparent_270deg_330deg,#D946EF_360deg)]"
+              />
+            </div>
+            
+            {/* মেইন ছবির চতুর্ভুজ ফ্রেম */}
+            <div className="absolute inset-0 rounded-[2.5rem] border-[4px] border-[#04060b] overflow-hidden bg-[#04060b] shadow-[0_0_50px_rgba(0,0,0,0.8)] z-10">
+              <img
+                src={principalSirPhoto}
+                alt="Dr. Mahbubur Rahman Mollah Heroic Poster"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#04060b]/50 via-transparent to-transparent" />
+            </div>
+
+            {/* THE EXPERIENCE CARD (ছোট সাইজ এবং ওয়াটার কালার গ্লাস শেপ) */}
+            <motion.div
+              initial={{ x: 50, opacity: 0 }} 
+              animate={{ x: 0, opacity: 1 }} 
+              transition={{ delay: 1.2, duration: 0.8 }}
+              className="absolute -right-4 lg:-right-8 bottom-8 bg-gradient-to-br from-[#C9A227]/20 via-[#6366F1]/15 to-[#10B981]/20 backdrop-blur-2xl border border-white/20 p-4 rounded-2xl z-20 shadow-[0_15px_30px_rgba(0,0,0,0.4)]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#C9A227] to-[#FFD700] rounded-full flex items-center justify-center text-black shadow-lg">
+                    <Trophy size={18} />
                 </div>
-
-                {/* THE EXPERIENCE CARD */}
-                <motion.div
-                  initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 1 }}
-                  className="absolute -right-10 bottom-20 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-3xl border border-white/20 p-7 rounded-[2.5rem] z-20 hidden md:block shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-                >
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-gradient-to-br from-[#C9A227] to-[#FFD700] rounded-full flex items-center justify-center text-black shadow-xl">
-                        <Trophy size={28} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase text-[#C9A227] tracking-widest">Legacy</p>
-                      <p className="text-4xl font-serif font-bold text-white leading-none mt-1">35+ Years</p>
-                    </div>
-                  </div>
-                </motion.div>
+                <div>
+                  <p className="text-[9px] font-black uppercase text-[#FFD700] tracking-widest drop-shadow-md">Dedication</p>
+                  <p className="text-xl font-serif font-bold text-white leading-none mt-1">35+ Years</p>
+                </div>
               </div>
-           </FadeIn>
-        </div>
+            </motion.div>
+
+          </div>
+        </motion.div>
       </div>
     </section>
   );
