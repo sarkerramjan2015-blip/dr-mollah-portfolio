@@ -1,68 +1,131 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Play, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, X, Video } from 'lucide-react';
 import { FadeIn } from './FadeIn';
+
+// ─────────────────────────────────────────────
+// 🌟 লোকাল অ্যাসেট ইমপোর্ট (ভিডিও এবং নতুন থাম্বনেইল)
+// ─────────────────────────────────────────────
+import sirVideo from '../asset/vedio/sir_vedio.mp4';
+import sirThumbnail from '../asset/bio/biography_pic.png'; // 👈 স্যারের ছবিটা কভার হিসেবে ইমপোর্ট করা হলো
 
 export function WatchTheLegacy() {
   const [isOpen, setIsOpen] = useState(false);
 
+  // বডি স্ক্রল বন্ধ করার জন্য Effect
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen]);
+
   return (
-    <section className="py-20 lg:py-32 px-5 lg:px-8 bg-[#04060b] border-t border-white/5 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#C9A227]/20 via-transparent to-transparent pointer-events-none" />
+    <section className="py-24 lg:py-36 px-5 lg:px-8 bg-[#04060b] border-t border-white/[0.02] relative overflow-hidden">
       
-      <div className="container mx-auto max-w-5xl text-center relative z-10">
+      {/* 🌟 Background Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,162,39,0.08)_0%,transparent_60%)] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/5 blur-[120px] rounded-full pointer-events-none" />
+      
+      <div className="container mx-auto max-w-6xl text-center relative z-10">
         <FadeIn>
-          <h2 className="text-sm font-bold tracking-widest text-[#C9A227] uppercase mb-3">Watch the Legacy</h2>
-          <h3 className="text-4xl lg:text-5xl font-serif font-bold text-white mb-12">A Journey of Excellence</h3>
           
+          {/* ════ HEADER ════ */}
+          <div className="flex flex-col items-center mb-16">
+            <div className="relative mb-6 inline-block group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-[#C9A227]/30 to-[#FFD700]/10 rounded-full blur-md opacity-50 group-hover:opacity-80 transition duration-1000"></div>
+              <div className="relative px-6 py-2 bg-[#0a0c10]/90 backdrop-blur-2xl border border-white/10 rounded-full shadow-xl flex items-center gap-2">
+                <Video className="w-3.5 h-3.5 text-[#C9A227]" />
+                <span className="text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase text-[#C9A227]">
+                  Watch The Legacy
+                </span>
+              </div>
+            </div>
+
+            <h3 className="text-4xl md:text-5xl lg:text-6xl font-serif font-black text-white leading-tight">
+              উৎকর্ষের <span className="bg-gradient-to-r from-[#C9A227] via-[#FFD700] to-[#F5E6C8] bg-clip-text text-transparent italic">যাত্রা</span>
+            </h3>
+            <p className="mt-4 text-slate-400 max-w-2xl mx-auto font-bengali text-lg">
+              সামসুল হক খান স্কুল অ্যান্ড কলেজের গৌরবময় ইতিহাস এবং সাফল্যের কিছু অবিস্মরণীয় মুহূর্ত।
+            </p>
+          </div>
+          
+          {/* ════ VIDEO THUMBNAIL ════ */}
           <div 
-            className="relative w-full aspect-video rounded-3xl overflow-hidden cursor-pointer group shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+            className="relative w-full max-w-5xl mx-auto aspect-video rounded-[2rem] overflow-hidden cursor-pointer group shadow-[0_20px_60px_rgba(0,0,0,0.6)] border border-white/10"
             onClick={() => setIsOpen(true)}
           >
+            {/* 🖼️ প্রিন্সিপাল স্যারের নতুন থাম্বনেইল ছবি 🖼️ */}
             <img 
-              src="https://picsum.photos/seed/legacy/1280/720" 
-              alt="Video Thumbnail" 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              src={sirThumbnail} // 👈 আনস্প্ল্যাশ ইমেজের জায়গায় স্যারের লোকাল ছবি বসিয়ে দেওয়া হলো
+              alt="Video Thumbnail — Principal Sir" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-[#04060b]/40 group-hover:bg-[#04060b]/20 transition-colors" />
             
+            {/* Dark Overlay for better button visibility */}
+            <div className="absolute inset-0 bg-[#04060b]/50 group-hover:bg-[#04060b]/30 transition-colors duration-700" />
+            
+            {/* Play Button */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 bg-[#C9A227] rounded-full flex items-center justify-center text-[#04060b] pl-1 group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(201,162,39,0.5)]">
-                <Play className="w-8 h-8 fill-current" />
+              <div className="relative flex items-center justify-center">
+                {/* Sonar Pulse Effect */}
+                <div className="absolute w-24 h-24 bg-[#C9A227] rounded-full animate-ping opacity-30" />
+                <div className="absolute w-32 h-32 bg-red-500 rounded-full animate-ping opacity-10" style={{ animationDelay: '0.5s' }} />
+                
+                {/* Main Button */}
+                <div className="w-20 h-20 bg-gradient-to-br from-[#C9A227] to-[#FFD700] rounded-full flex items-center justify-center text-[#04060b] pl-1.5 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_40px_rgba(201,162,39,0.6)] relative z-10">
+                  <Play className="w-8 h-8 fill-current" />
+                </div>
               </div>
+            </div>
+            
+            {/* Bottom Caption */}
+            <div className="absolute bottom-6 left-6 right-6 text-left">
+              <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-md text-[10px] font-bold text-[#FFD700] tracking-wider uppercase font-bengali">
+                ডকুমেন্টারি
+              </span>
             </div>
           </div>
         </FadeIn>
       </div>
 
+      {/* ════ VIDEO MODAL ════ */}
       <AnimatePresence>
         {isOpen && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-[#04060b]/95 backdrop-blur-3xl flex items-center justify-center p-4 md:p-8"
+            className="fixed inset-0 z-[200] bg-[#04060b]/95 backdrop-blur-2xl flex items-center justify-center p-4 md:p-8"
             onClick={() => setIsOpen(false)}
           >
+            {/* Close Button */}
             <button 
-              className="absolute top-6 right-6 md:top-10 md:right-10 text-white hover:text-[#C9A227] bg-white/5 hover:bg-white/10 p-3 rounded-full transition-colors z-50"
+              className="absolute top-6 right-6 md:top-10 md:right-10 text-white hover:text-red-500 bg-white/10 hover:bg-white/20 p-3 rounded-full transition-colors z-50 backdrop-blur-md"
               onClick={() => setIsOpen(false)}
             >
               <X className="w-6 h-6" />
             </button>
+
+            {/* Video Player Container */}
             <motion.div 
               initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }}
-              className="w-full max-w-6xl aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_0_100px_rgba(201,162,39,0.2)] border border-white/10"
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="w-full max-w-6xl aspect-video bg-black rounded-2xl md:rounded-[2rem] overflow-hidden shadow-[0_0_100px_rgba(201,162,39,0.15)] border border-white/10"
               onClick={e => e.stopPropagation()}
             >
-              <iframe 
+              {/* লোকাল HTML5 Video Player using sirVideo */}
+              <video 
                 width="100%" 
                 height="100%" 
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" 
-                title="YouTube video player" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-              ></iframe>
+                controls 
+                autoPlay 
+                className="w-full h-full outline-none object-cover bg-black"
+              >
+                <source src={sirVideo} type="video/mp4" />
+                আপনার ব্রাউজার ভিডিওটি সাপোর্ট করছে না।
+              </video>
             </motion.div>
           </motion.div>
         )}
