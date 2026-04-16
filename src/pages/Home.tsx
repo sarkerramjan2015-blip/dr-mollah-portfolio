@@ -6,10 +6,10 @@ import { Hero } from '../components/Hero';
 import { InstitutionsMarquee } from '../components/InstitutionsMarquee';
 import { TransformationStory } from '../components/TransformationStory';
 import { Biography } from '../components/Biography';
+import { Publications } from '../components/Publications';
 import { VisionMission } from '../components/VisionMission';
 import { StrategicDialogues } from '../components/StrategicDialogues';
 import { NationalTributes } from '../components/NationalTributes';
-import { Publications } from '../components/Publications';
 import { AwardsLeadership } from '../components/AwardsLeadership';
 import { AestheticGallery } from '../components/AestheticGallery';
 import { WatchTheLegacy } from '../components/WatchTheLegacy';
@@ -47,9 +47,9 @@ export function Home() {
       <VisionMission />
       <Biography />
       <TransformationStory />
+      <Publications />
       <StrategicDialogues />
       <NationalTributes />
-      <Publications />
       <AwardsLeadership />
       <WatchTheLegacy />
       <ContactFooter />

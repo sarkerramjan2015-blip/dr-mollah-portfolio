@@ -200,3 +200,13 @@ export function TransformationStory() {
     </section>
   );
 }
+export default function Home() {
+  return (
+    <main>
+      {/* ... আগের কোডগুলো ... */}
+      <TransformationStory />
+      <Publications />  {/* 👈 এই লাইনটা অ্যাড করো */}
+      {/* ... বাকি কোডগুলো ... */}
+    </main>
+  )
+}
