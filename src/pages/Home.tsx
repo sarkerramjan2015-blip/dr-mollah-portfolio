@@ -7,7 +7,6 @@ import { InstitutionsMarquee } from '../components/InstitutionsMarquee';
 import { TransformationStory } from '../components/TransformationStory';
 import { Biography } from '../components/Biography';
 import { VisionMission } from '../components/VisionMission';
-import { SocialActivities } from '../components/SocialActivities';
 import { StrategicDialogues } from '../components/StrategicDialogues';
 import { NationalTributes } from '../components/NationalTributes';
 import { Publications } from '../components/Publications';
@@ -48,7 +47,6 @@ export function Home() {
       <VisionMission />
       <Biography />
       <TransformationStory />
-      <SocialActivities />
       <StrategicDialogues />
       <NationalTributes />
       <Publications />
