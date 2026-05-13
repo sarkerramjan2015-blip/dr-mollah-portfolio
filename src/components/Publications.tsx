@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Newspaper, ArrowRight, X, BookOpen } from 'lucide-react';
 import { FadeIn } from './FadeIn';
+import { FilterTabs } from './ui/Premium';
 
 // ─────────────────────────────────────────────
 // 🌟 ইমেজের ইমপোর্টগুলো
@@ -19,7 +20,37 @@ import img9 from '../asset/news_paper/prothom_alo.jpg';
 // ─────────────────────────────────────────────
 // 🌟 ৯টি নিউজপেপারের সম্পূর্ণ ডেটাবেস
 // ─────────────────────────────────────────────
-const publicationsData = [
+type Publication = {
+  id: number;
+  title: string;
+  paper: string;
+  category: string;
+  img: string;
+};
+
+type PublicationFilter = 'all' | 'leadership' | 'academic' | 'national' | 'media';
+
+const publicationFilters: { id: PublicationFilter; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'leadership', label: 'Leadership' },
+  { id: 'academic', label: 'Academic' },
+  { id: 'national', label: 'National' },
+  { id: 'media', label: 'Media' },
+];
+
+const publicationFilterMap: Record<number, Exclude<PublicationFilter, 'all'>> = {
+  1: 'academic',
+  2: 'academic',
+  3: 'national',
+  4: 'leadership',
+  5: 'academic',
+  6: 'academic',
+  7: 'leadership',
+  8: 'academic',
+  9: 'media',
+};
+
+const publicationsData: Publication[] = [
   { id: 1, title: 'এইচএসসিতে কেন এত ফেল', paper: 'বাংলাদেশ প্রতিদিন', category: 'শিক্ষা বিশ্লেষণ', img: img1 },
   { id: 2, title: 'এবার যুদ্ধ বিশ্ববিদ্যালয়ে ভর্তিতে', paper: 'বাংলাদেশ প্রতিদিন', category: 'উচ্চশিক্ষা', img: img2 },
   { id: 3, title: 'ঝরে পড়ছে শিক্ষার্থীরা', paper: 'বাংলাদেশ প্রতিদিন', category: 'সামাজিক দৃষ্টিভঙ্গি', img: img3 },
@@ -32,10 +63,35 @@ const publicationsData = [
 ];
 
 export function Publications() {
-  const [selectedArticle, setSelectedArticle] = useState<any>(null);
+  const [selectedArticle, setSelectedArticle] = useState<Publication | null>(null);
+  const [activeFilter, setActiveFilter] = useState<PublicationFilter>('all');
+  const filteredPublications = useMemo(() => (
+    activeFilter === 'all'
+      ? publicationsData
+      : publicationsData.filter((publication) => publicationFilterMap[publication.id] === activeFilter)
+  ), [activeFilter]);
+
+  useEffect(() => {
+    if (!selectedArticle) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedArticle(null);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedArticle]);
 
   return (
-    <section id="publications" className="relative py-24 lg:py-32 px-5 lg:px-8 bg-[#04060b] overflow-hidden">
+    <section className="relative py-24 lg:py-32 px-5 lg:px-8 bg-[#04060b] overflow-hidden">
       
       {/* 🌟 Background Visuals */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#ef4444]/50 to-transparent opacity-30" />
@@ -63,13 +119,22 @@ export function Publications() {
           </h3>
         </div>
 
+        <FilterTabs
+          options={publicationFilters}
+          active={activeFilter}
+          onChange={setActiveFilter}
+          ariaLabel="Filter publications"
+        />
+
         {/* ════ GRID SECTION ════ */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-          {publicationsData.map((pub, index) => (
+          {filteredPublications.map((pub, index) => (
             <FadeIn key={pub.id} delay={index * 0.1}>
-              <div 
+              <button
+                type="button"
                 onClick={() => setSelectedArticle(pub)}
-                className="group relative bg-[#0a0c10]/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-red-500/30 transition-all duration-500 cursor-pointer shadow-2xl h-full flex flex-col"
+                aria-label={`Open publication: ${pub.title}`}
+                className="group relative bg-[#0a0c10]/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-red-500/30 transition-all duration-500 cursor-pointer shadow-2xl h-full flex flex-col text-left w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-4 focus-visible:ring-offset-[#04060b]"
               >
                 {/* Image Wrap */}
                 <div className="relative h-64 overflow-hidden">
@@ -91,7 +156,7 @@ export function Publications() {
                 {/* Content */}
                 <div className="p-8 flex-grow flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center gap-2 mb-4 text-[#C9A227] font-bold text-xs uppercase tracking-tighter">
+                    <div className="flex items-center gap-2 mb-4 text-[#C9A227] font-bold text-xs uppercase tracking-normal">
                       <BookOpen size={14} /> {pub.category}
                     </div>
                     <h4 className="text-2xl font-bold text-white group-hover:text-red-500 transition-colors font-bengali leading-snug">
@@ -106,7 +171,7 @@ export function Publications() {
                     <Newspaper size={20} className="text-white/10 group-hover:text-red-500/50 transition-colors" />
                   </div>
                 </div>
-              </div>
+              </button>
             </FadeIn>
           ))}
         </div>
@@ -119,6 +184,9 @@ export function Publications() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-md"
             onClick={() => setSelectedArticle(null)} // Click outside to close
+            role="dialog"
+            aria-modal="true"
+            aria-label="Publication image preview"
           >
             <motion.div 
               initial={{ scale: 0.9, y: 50 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 50 }}
@@ -131,7 +199,7 @@ export function Publications() {
                   <span className="font-black text-xs md:text-sm uppercase tracking-widest text-zinc-800">{selectedArticle.paper}</span>
                   <span className="text-[10px] font-bold text-red-600 tracking-wider uppercase">{selectedArticle.category}</span>
                 </div>
-                <button onClick={() => setSelectedArticle(null)} className="p-2 bg-zinc-300/50 hover:bg-zinc-300 rounded-full transition-colors text-zinc-800">
+                <button type="button" aria-label="Close publication preview" onClick={() => setSelectedArticle(null)} className="p-2 bg-zinc-300/50 hover:bg-zinc-300 rounded-full transition-colors text-zinc-800">
                   <X size={24} />
                 </button>
               </div>

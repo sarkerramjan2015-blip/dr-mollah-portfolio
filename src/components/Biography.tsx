@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Quote, X } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -10,6 +10,25 @@ import bioImg from '../asset/bio/biography_pic.png';
 export function Biography() {
   const { lang } = useLanguage();
   const [isZoomed, setIsZoomed] = useState(false);
+
+  useEffect(() => {
+    if (!isZoomed) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsZoomed(false);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isZoomed]);
 
   const ACADEMICS = [
     { year: "1986", degree: "SSC (1st Div with Credit)", inst: "Matuail High School" },
@@ -29,11 +48,13 @@ export function Biography() {
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
           
           {/* Left Column: Portrait with Moving Dotted Border */}
-          <motion.div
+          <motion.button
+            type="button"
+            aria-label="Open Dr. M. R. Mollah biography portrait preview"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="lg:col-span-5 relative group cursor-pointer"
+            className="lg:col-span-5 relative group cursor-pointer appearance-none bg-transparent border-0 p-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A227] focus-visible:ring-offset-4 focus-visible:ring-offset-[#04060b] rounded-[3rem]"
             onClick={() => setIsZoomed(true)}
           >
             {/* ✨ Moving Dotted Border Animation */}
@@ -56,6 +77,11 @@ export function Biography() {
               <img
                 src={bioImg}
                 alt="Dr. M. R. Mollah"
+                width={1696}
+                height={2528}
+                loading="lazy"
+                decoding="async"
+                sizes="(min-width: 1024px) 42vw, 90vw"
                 className="w-full h-auto object-cover aspect-[4/5] group-hover:scale-105 transition-transform duration-1000"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#04060b] via-transparent to-transparent opacity-80" />
@@ -66,7 +92,7 @@ export function Biography() {
                 {/* Digital Signature removed as requested */}
               </div>
             </div>
-          </motion.div>
+          </motion.button>
 
           {/* Right Column: Content */}
           <div className="lg:col-span-7">
@@ -153,10 +179,18 @@ export function Biography() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999] bg-[#04060b]/fb backdrop-blur-2xl flex items-center justify-center p-6"
+            className="fixed inset-0 z-[999] bg-[#04060b]/95 backdrop-blur-2xl flex items-center justify-center p-6"
             onClick={() => setIsZoomed(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Biography portrait preview"
           >
-            <button className="absolute top-10 right-10 p-4 bg-white/5 rounded-full text-white hover:bg-red-600 transition-colors">
+            <button
+              type="button"
+              aria-label="Close biography portrait preview"
+              className="absolute top-10 right-10 p-4 bg-white/5 rounded-full text-white hover:bg-red-600 transition-colors"
+              onClick={() => setIsZoomed(false)}
+            >
               <X size={32} />
             </button>
             <motion.img
@@ -165,7 +199,9 @@ export function Biography() {
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", damping: 25 }}
               src={bioImg}
+              alt="Dr. M. R. Mollah biography portrait preview"
               className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-[0_0_100px_rgba(255,0,0,0.1)] border border-white/10"
+              onClick={(event) => event.stopPropagation()}
             />
           </motion.div>
         )}

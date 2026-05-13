@@ -39,8 +39,18 @@ const FALLBACK_AWARDS = [
   { id: 5, title: "Special Recognition", year: "2009", body: "Dhaka-5 Parliamentary recognition by Alhaz Habibur Rahman Mollah", icon: "Award" }
 ];
 
-export function useSupabaseData(tableName: string, fallbackData: any[]) {
-  const [data, setData] = useState<any[]>(fallbackData);
+type SupabaseFallbackRecord = Record<string, unknown>;
+
+const hasSupabaseConfig = Boolean(
+  import.meta.env.VITE_SUPABASE_URL &&
+  import.meta.env.VITE_SUPABASE_ANON_KEY &&
+  !String(import.meta.env.VITE_SUPABASE_URL).includes('placeholder')
+);
+
+const shouldReadPublicSupabaseData = import.meta.env.VITE_PUBLIC_SUPABASE_READS === 'true';
+
+export function useSupabaseData<T extends SupabaseFallbackRecord>(tableName: string, fallbackData: T[]) {
+  const [data, setData] = useState<T[]>(fallbackData);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,20 +58,18 @@ export function useSupabaseData(tableName: string, fallbackData: any[]) {
       try {
         const { data: fetchedData, error } = await supabase.from(tableName).select('*');
         if (error || !fetchedData || fetchedData.length === 0) {
-          console.warn(`Failed to fetch ${tableName} or empty, using fallback.`);
           setData(fallbackData);
         } else {
-          setData(fetchedData);
+          setData(fetchedData as T[]);
         }
-      } catch (err) {
-        console.error(`Error fetching ${tableName}:`, err);
+      } catch {
         setData(fallbackData);
       } finally {
         setLoading(false);
       }
     }
 
-    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+    if (hasSupabaseConfig && shouldReadPublicSupabaseData) {
       fetchData();
     } else {
       setLoading(false);

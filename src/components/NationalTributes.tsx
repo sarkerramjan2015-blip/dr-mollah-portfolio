@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Calendar } from 'lucide-react';
 import { FadeIn } from './FadeIn';
 
@@ -87,7 +87,7 @@ export function NationalTributes() {
           {TRIBUTES.map((item, i) => (
             <FadeIn key={item.id} delay={i * 0.15}>
               <div 
-                className={`relative rounded-[2rem] overflow-hidden bg-[#0a0c10] border border-white/10 group cursor-pointer transition-all duration-500 hover:-translate-y-3 hover:border-white/20 ${item.glowColor}`}
+                className={`relative rounded-[2rem] overflow-hidden bg-[#0a0c10] border border-white/10 group transition-all duration-500 hover:-translate-y-3 hover:border-white/20 ${item.glowColor}`}
               >
                 {/* 🖼️ Poster Image container */}
                 <div className="aspect-[4/5] w-full relative overflow-hidden">

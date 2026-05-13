@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, X } from 'lucide-react';
+import { useInteractiveMarquee } from '../hooks/useInteractiveMarquee';
+import { FilterTabs } from './ui/Premium';
 
 // 👇 তোমার লোকাল ফোল্ডার থেকে ইভেন্টের ছবিগুলো ইমপোর্ট করা হলো
 // (ফোল্ডারের নাম 'New folder' থাকলে এভাবেই কাজ করবে, তবে স্পেস ছাড়া নাম দিলে ভালো)
@@ -91,54 +93,133 @@ const dialoguesData = [
   }
 ];
 
-export function StrategicDialogues() {
-  const [selectedDialogue, setSelectedDialogue] = useState<any | null>(null);
+type DialogueItem = (typeof dialoguesData)[number];
 
-  // বডি স্ক্রল বন্ধ করার জন্য Effect
+type EventFilter = 'all' | 'leadership' | 'academic' | 'national' | 'media';
+
+const eventFilters: { id: EventFilter; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'leadership', label: 'Leadership' },
+  { id: 'academic', label: 'Academic' },
+  { id: 'national', label: 'National' },
+  { id: 'media', label: 'Media' },
+];
+
+const eventFilterMap: Record<number, Exclude<EventFilter, 'all'>> = {
+  1: 'academic',
+  2: 'academic',
+  3: 'academic',
+  4: 'leadership',
+  5: 'academic',
+  6: 'national',
+  7: 'leadership',
+  8: 'national',
+  9: 'media',
+  10: 'leadership',
+};
+
+type DialogueRowProps = {
+  autoScroll: boolean;
+  direction: "left" | "right";
+  items: DialogueItem[];
+  onSelect: (item: DialogueItem) => void;
+};
+
+function DialogueRow({ autoScroll, direction, items, onSelect }: DialogueRowProps) {
+  const loopItems = items.length
+    ? Array.from({ length: Math.max(3, Math.ceil(9 / items.length)) }, () => items).flat()
+    : [];
+  const eventMarquee = useInteractiveMarquee<HTMLDivElement>({
+    autoScroll,
+    direction,
+    speed: 30,
+    resetKey: `${direction}-${items.map((item) => item.id).join('-')}`,
+  });
+
+  if (loopItems.length === 0) return null;
+
+  return (
+    <div
+      ref={eventMarquee.ref}
+      {...eventMarquee.marqueeProps}
+      className={`interactive-marquee overflow-x-auto px-5 md:px-8 ${
+        eventMarquee.isDragging ? 'is-dragging' : ''
+      }`}
+      aria-label={`Campus events carousel moving ${direction}`}
+    >
+      <div className="flex w-max gap-6 pb-6 pr-6">
+        {loopItems.map((item, idx) => (
+          <div
+            key={`${item.id}-${idx}`}
+            className="w-80 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shrink-0 group hover:border-[#C9A227]/50 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(201,162,39,0.15)] transition-all duration-300 flex flex-col"
+          >
+            <div className="h-48 overflow-hidden relative shrink-0 border-b border-white/5">
+              <img
+                src={item.img}
+                alt={item.title}
+                draggable={false}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 object-top"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#04060b]/80 via-transparent to-transparent opacity-60" />
+            </div>
+            <div className="p-6 flex flex-col flex-1 justify-between bg-[#0a0c10]/80">
+              <div>
+                <h4 className="font-bengali text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#C9A227] transition-colors leading-snug">{item.title}</h4>
+                <p className="font-bengali text-sm text-slate-400 mb-5 line-clamp-2">{item.caption}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (eventMarquee.shouldIgnoreClick()) return;
+                  onSelect(item);
+                }}
+                aria-label={`Read details for ${item.title}`}
+                className="inline-flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-[#04060b] bg-gradient-to-r from-[#C9A227] to-[#FFD700] hover:from-[#FFD700] hover:to-[#C9A227] px-5 py-2.5 rounded-lg transition-all self-start shadow-lg"
+              >
+                বিস্তারিত পড়ুন <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function StrategicDialogues() {
+  const [selectedDialogue, setSelectedDialogue] = useState<DialogueItem | null>(null);
+  const [activeFilter, setActiveFilter] = useState<EventFilter>('all');
+  const filteredDialogues = useMemo(() => (
+    activeFilter === 'all'
+      ? dialoguesData
+      : dialoguesData.filter((dialogue) => eventFilterMap[dialogue.id] === activeFilter)
+  ), [activeFilter]);
+
   useEffect(() => {
-    if (selectedDialogue) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => { document.body.style.overflow = 'unset'; };
+    if (!selectedDialogue) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedDialogue(null);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [selectedDialogue]);
 
-  // ১০টি ডেটাকে ২টা রো তে ভাগ করা হলো (৫+৫)
-  const row1 = dialoguesData.slice(0, 5);
-  const row2 = dialoguesData.slice(5, 10);
-
-  const Row = ({ items, direction }: { items: any[], direction: "left" | "right" }) => (
-    <motion.div 
-      className="flex gap-6 w-max mb-6"
-      animate={{ x: direction === "left" ? ["0%", "-50%"] : ["-50%", "0%"] }}
-      transition={{ repeat: Infinity, ease: "linear", duration: 60 }} // এনিমেশন স্মুথ করার জন্য ডিউরেশন বাড়ানো হলো
-    >
-      {[...items, ...items, ...items].map((item, idx) => (
-        <div 
-          key={idx} 
-          className="w-80 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shrink-0 group hover:border-[#C9A227]/50 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(201,162,39,0.15)] transition-all duration-300 flex flex-col"
-        >
-          <div className="h-48 overflow-hidden relative shrink-0 border-b border-white/5">
-            <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 object-top" referrerPolicy="no-referrer" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#04060b]/80 via-transparent to-transparent opacity-60" />
-          </div>
-          <div className="p-6 flex flex-col flex-1 justify-between bg-[#0a0c10]/80">
-            <div>
-               <h4 className="font-bengali text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#C9A227] transition-colors leading-snug">{item.title}</h4>
-               <p className="font-bengali text-sm text-slate-400 mb-5 line-clamp-2">{item.caption}</p>
-            </div>
-            <button 
-              onClick={() => setSelectedDialogue(item)}
-              className="inline-flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-[#04060b] bg-gradient-to-r from-[#C9A227] to-[#FFD700] hover:from-[#FFD700] hover:to-[#C9A227] px-5 py-2.5 rounded-lg transition-all self-start shadow-lg"
-            >
-              বিস্তারিত পড়ুন <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      ))}
-    </motion.div>
-  );
+  const splitIndex = Math.ceil(filteredDialogues.length / 2);
+  const row1 = filteredDialogues.slice(0, splitIndex);
+  const row2 = filteredDialogues.slice(splitIndex);
 
   return (
     <section className="py-20 lg:py-32 bg-[#04060b] text-white overflow-hidden relative border-t border-white/5">
@@ -147,14 +228,21 @@ export function StrategicDialogues() {
         <h2 className="text-sm font-bold tracking-widest text-[#C9A227] uppercase mb-3">Campus Events & Dialogues</h2>
         <h3 className="text-4xl lg:text-5xl font-bengali font-black text-white">ক্যাম্পাস ইভেন্ট ও <span className="bg-gradient-to-r from-[#C9A227] to-[#FFD700] bg-clip-text text-transparent italic">সংলাপ</span></h3>
       </div>
+
+      <FilterTabs
+        options={eventFilters}
+        active={activeFilter}
+        onChange={setActiveFilter}
+        ariaLabel="Filter campus events"
+      />
       
       <div className="relative">
         <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-[#04060b] to-transparent z-10 pointer-events-none" />
         <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-[#04060b] to-transparent z-10 pointer-events-none" />
         
         {/* দুই সারিতে স্ক্রলিং ইভেন্ট */}
-        <Row items={row1} direction="left" />
-        <Row items={row2} direction="right" />
+        <DialogueRow autoScroll items={row1} direction="left" onSelect={setSelectedDialogue} />
+        <DialogueRow autoScroll items={row2} direction="right" onSelect={setSelectedDialogue} />
       </div>
 
       {/* 📰 ইভেন্ট ডিটেইলস পপ-আপ (Modal) 📰 */}
@@ -164,6 +252,9 @@ export function StrategicDialogues() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
             onClick={() => setSelectedDialogue(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Campus event details"
           >
             <motion.div 
               initial={{ scale: 0.95, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 20, opacity: 0 }}
@@ -174,6 +265,8 @@ export function StrategicDialogues() {
               
               {/* ক্লোজ বাটন */}
               <button 
+                type="button"
+                aria-label="Close campus event details"
                 onClick={() => setSelectedDialogue(null)} 
                 className="absolute top-4 right-4 md:top-6 md:right-6 z-50 text-slate-300 hover:text-white bg-black/40 hover:bg-red-500/80 p-2 rounded-full transition-all backdrop-blur-md"
               >

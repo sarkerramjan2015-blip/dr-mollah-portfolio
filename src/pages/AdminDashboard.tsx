@@ -1,11 +1,23 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
-import { LogOut, Plus, Trash2, Edit } from 'lucide-react';
+import { LogOut, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+type Activity = {
+  id: number;
+  title: string;
+  desc: string;
+  date: string;
+  img: string;
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => (
+  error instanceof Error ? error.message : fallback
+);
+
 export function AdminDashboard() {
-  const [activities, setActivities] = useState<any[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
@@ -24,9 +36,9 @@ export function AdminDashboard() {
     try {
       const { data, error } = await supabase.from('activities').select('*').order('id', { ascending: false });
       if (error) throw error;
-      setActivities(data || []);
+      setActivities((data || []) as Activity[]);
     } catch (error) {
-      console.error('Error fetching activities:', error);
+      toast.error(getErrorMessage(error, 'Failed to load activities'));
     } finally {
       setLoading(false);
     }
@@ -58,8 +70,8 @@ export function AdminDashboard() {
       const { data } = supabase.storage.from('portfolio-images').getPublicUrl(filePath);
       setImgUrl(data.publicUrl);
       toast.success('Image uploaded successfully!');
-    } catch (error: any) {
-      toast.error(error.message || 'Error uploading image');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Error uploading image'));
     } finally {
       setUploading(false);
     }
@@ -75,8 +87,8 @@ export function AdminDashboard() {
       toast.success('Activity added successfully!');
       setTitle(''); setDesc(''); setDate(''); setImgUrl('');
       fetchActivities();
-    } catch (error: any) {
-      toast.error(error.message || 'Error adding activity');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Error adding activity'));
     }
   };
 
@@ -86,8 +98,8 @@ export function AdminDashboard() {
       if (error) throw error;
       toast.success('Activity deleted successfully!');
       fetchActivities();
-    } catch (error: any) {
-      toast.error(error.message || 'Error deleting activity');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Error deleting activity'));
     }
   };
 
@@ -96,7 +108,7 @@ export function AdminDashboard() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-12">
           <h1 className="text-4xl font-serif font-bold text-white">Admin Dashboard</h1>
-          <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
+          <button type="button" onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
             <LogOut size={18} /> Logout
           </button>
         </div>
@@ -137,7 +149,7 @@ export function AdminDashboard() {
                       <h3 className="text-lg font-bold text-white">{activity.title}</h3>
                       <p className="text-sm text-slate-400">{activity.date}</p>
                     </div>
-                    <button onClick={() => handleDeleteActivity(activity.id)} className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
+                    <button type="button" aria-label={`Delete ${activity.title}`} onClick={() => handleDeleteActivity(activity.id)} className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
                       <Trash2 size={20} />
                     </button>
                   </div>

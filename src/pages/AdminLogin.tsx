@@ -1,7 +1,11 @@
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+
+const getErrorMessage = (error: unknown, fallback: string) => (
+  error instanceof Error ? error.message : fallback
+);
 
 export function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -17,8 +21,8 @@ export function AdminLogin() {
       if (error) throw error;
       toast.success('Logged in successfully!');
       navigate('/admin/dashboard');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to login');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to login'));
     } finally {
       setLoading(false);
     }
@@ -33,6 +37,7 @@ export function AdminLogin() {
             <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
             <input 
               type="email" 
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-4 rounded-xl bg-[#04060b]/50 border border-white/10 text-white focus:border-[#C9A227] outline-none transition-colors"
@@ -43,6 +48,7 @@ export function AdminLogin() {
             <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
             <input 
               type="password" 
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-4 rounded-xl bg-[#04060b]/50 border border-white/10 text-white focus:border-[#C9A227] outline-none transition-colors"

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, useInView, animate } from 'framer-motion';
+import { useState, useRef, useEffect, type ReactNode } from 'react';
+import { motion, useInView, animate } from 'motion/react';
 import { Tent, Globe } from 'lucide-react';
 import { FadeIn } from './FadeIn';
 
@@ -9,7 +9,14 @@ import presentImage from '../asset/modern_campus.png';
 // ─────────────────────────────────────────────
 // 🌟 1. Animated Counter — ultra smooth spring
 // ─────────────────────────────────────────────
-const SmoothCounter = ({ from = 0, to, duration = 6, trigger }: any) => {
+type SmoothCounterProps = {
+  from?: number;
+  to: number;
+  duration?: number;
+  trigger: boolean;
+};
+
+const SmoothCounter = ({ from = 0, to, duration = 6, trigger }: SmoothCounterProps) => {
   const [display, setDisplay] = useState(from);
   const hasRun = useRef(false);
 
@@ -19,7 +26,7 @@ const SmoothCounter = ({ from = 0, to, duration = 6, trigger }: any) => {
     const controls = animate(from, to, {
       duration,
       ease: [0.16, 1, 0.3, 1],
-      onUpdate: v => setDisplay(Math.round(v)),
+      onUpdate: (value) => setDisplay(Math.round(value)),
     });
     return () => controls.stop();
   }, [trigger, from, to, duration]);
@@ -30,12 +37,22 @@ const SmoothCounter = ({ from = 0, to, duration = 6, trigger }: any) => {
 // ─────────────────────────────────────────────
 // 🌟 2. Static Image (No Jitter)
 // ─────────────────────────────────────────────
-const StableImage = ({ src, alt, grayscale = false, className = '', containerClassName = '' }: any) => (
+type StableImageProps = {
+  src: string;
+  alt: string;
+  grayscale?: boolean;
+  className?: string;
+  containerClassName?: string;
+};
+
+const StableImage = ({ src, alt, grayscale = false, className = '', containerClassName = '' }: StableImageProps) => (
   <div className={`overflow-hidden rounded-2xl relative ${containerClassName}`}>
     <div className="w-full h-full overflow-hidden rounded-2xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         className={`w-full h-full object-cover transform-gpu transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           grayscale ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'opacity-90 hover:opacity-100'
         } hover:scale-105 ${className}`}
@@ -47,7 +64,16 @@ const StableImage = ({ src, alt, grayscale = false, className = '', containerCla
 // ─────────────────────────────────────────────
 // 🌟 3. Premium Orbit Light Border (For Right Card)
 // ─────────────────────────────────────────────
-const OrbitBorder = ({ children, radius = '2rem', duration = 10, blur = 20, opacity = 0.4, className = '' }: any) => (
+type OrbitBorderProps = {
+  children: ReactNode;
+  radius?: string;
+  duration?: number;
+  blur?: number;
+  opacity?: number;
+  className?: string;
+};
+
+const OrbitBorder = ({ children, radius = '2rem', duration = 10, blur = 20, opacity = 0.4, className = '' }: OrbitBorderProps) => (
   <div className={`relative ${className}`} style={{ borderRadius: radius }}>
     <div className="absolute inset-[-2px] overflow-hidden pointer-events-none" style={{ borderRadius: `calc(${radius} + 2px)` }}>
       <motion.div
@@ -161,7 +187,7 @@ export function TransformationStory() {
                   <div className="flex-1 space-y-2">
                     <span className="text-xs font-bold tracking-[0.2em] uppercase text-slate-500">1889 — The Beginning</span>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-5xl font-bold text-white/80 tracking-tighter">157</span>
+                      <span className="text-5xl font-bold text-white/80 tracking-normal">157</span>
                       <span className="text-sm text-slate-500 font-medium">Students</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-slate-500 pt-1">
@@ -179,7 +205,7 @@ export function TransformationStory() {
                   <div className="flex-1 space-y-2">
                     <span className="text-xs font-bold tracking-[0.2em] uppercase text-red-500">2026 — The Present</span>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-6xl lg:text-7xl font-black tracking-tighter bg-gradient-to-r from-red-500 to-[#FFD700] bg-clip-text text-transparent">
+                      <span className="text-6xl lg:text-7xl font-black tracking-normal bg-gradient-to-r from-red-500 to-[#FFD700] bg-clip-text text-transparent">
                         <SmoothCounter from={157} to={20000} duration={5} trigger={isInView} />+
                       </span>
                       <span className="text-base text-slate-400 font-medium">Students</span>
@@ -199,14 +225,4 @@ export function TransformationStory() {
       </div>
     </section>
   );
-}
-export default function Home() {
-  return (
-    <main>
-      {/* ... আগের কোডগুলো ... */}
-      <TransformationStory />
-      <Publications />  {/* 👈 এই লাইনটা অ্যাড করো */}
-      {/* ... বাকি কোডগুলো ... */}
-    </main>
-  )
 }
