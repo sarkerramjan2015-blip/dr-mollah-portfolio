@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Play, X, Video } from 'lucide-react';
 import { FadeIn } from './FadeIn';
 
@@ -9,17 +9,32 @@ import { FadeIn } from './FadeIn';
 import sirVideo from '../asset/vedio/sir_vedio.mp4';
 import sirThumbnail from '../asset/bio/biography_pic.png'; // 👈 স্যারের ছবিটা কভার হিসেবে ইমপোর্ট করা হলো
 
+const legacyHighlights = [
+  'সামসুল হক খান স্কুল অ্যান্ড কলেজের রূপান্তরের পথচলা',
+  'শিক্ষা নেতৃত্ব, প্রতিষ্ঠান নির্মাণ ও শিক্ষার্থীদের সাফল্যের স্মৃতি',
+  'ড. মাহবুবুর রহমান মোল্লার দীর্ঘ শিক্ষাসেবার অনুপ্রেরণামূলক অধ্যায়',
+];
+
 export function WatchTheLegacy() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // বডি স্ক্রল বন্ধ করার জন্য Effect
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => { document.body.style.overflow = 'unset'; };
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen]);
 
   return (
@@ -53,14 +68,22 @@ export function WatchTheLegacy() {
           </div>
           
           {/* ════ VIDEO THUMBNAIL ════ */}
-          <div 
-            className="relative w-full max-w-5xl mx-auto aspect-video rounded-[2rem] overflow-hidden cursor-pointer group shadow-[0_20px_60px_rgba(0,0,0,0.6)] border border-white/10"
+          <button
+            type="button"
+            aria-label="Open legacy documentary video"
+            aria-describedby="legacy-video-description"
+            className="relative block w-full max-w-5xl mx-auto aspect-video rounded-[2rem] overflow-hidden cursor-pointer group shadow-[0_20px_60px_rgba(0,0,0,0.6)] border border-white/10 text-left"
             onClick={() => setIsOpen(true)}
           >
             {/* 🖼️ প্রিন্সিপাল স্যারের নতুন থাম্বনেইল ছবি 🖼️ */}
             <img 
               src={sirThumbnail} // 👈 আনস্প্ল্যাশ ইমেজের জায়গায় স্যারের লোকাল ছবি বসিয়ে দেওয়া হলো
-              alt="Video Thumbnail — Principal Sir" 
+              alt="Dr. Mahbubur Rahman Mollah documentary thumbnail"
+              width={1696}
+              height={2528}
+              loading="lazy"
+              decoding="async"
+              sizes="(min-width: 1024px) 960px, calc(100vw - 40px)"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]"
               referrerPolicy="no-referrer"
             />
@@ -88,6 +111,17 @@ export function WatchTheLegacy() {
                 ডকুমেন্টারি
               </span>
             </div>
+          </button>
+
+          <div
+            id="legacy-video-description"
+            className="mx-auto mt-8 grid max-w-5xl gap-3 text-left md:grid-cols-3"
+          >
+            {legacyHighlights.map((highlight) => (
+              <div key={highlight} className="rounded-xl border border-white/10 bg-white/[0.025] px-5 py-4">
+                <p className="font-bengali text-sm leading-7 text-slate-300">{highlight}</p>
+              </div>
+            ))}
           </div>
         </FadeIn>
       </div>
@@ -99,9 +133,15 @@ export function WatchTheLegacy() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[200] bg-[#04060b]/95 backdrop-blur-2xl flex items-center justify-center p-4 md:p-8"
             onClick={() => setIsOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Legacy documentary video"
+            aria-describedby="legacy-video-description"
           >
             {/* Close Button */}
             <button 
+              type="button"
+              aria-label="Close legacy documentary video"
               className="absolute top-6 right-6 md:top-10 md:right-10 text-white hover:text-red-500 bg-white/10 hover:bg-white/20 p-3 rounded-full transition-colors z-50 backdrop-blur-md"
               onClick={() => setIsOpen(false)}
             >
@@ -121,7 +161,10 @@ export function WatchTheLegacy() {
                 height="100%" 
                 controls 
                 autoPlay 
-                className="w-full h-full outline-none object-cover bg-black"
+                playsInline
+                preload="metadata"
+                poster={sirThumbnail}
+                className="w-full h-full outline-none object-contain bg-black"
               >
                 <source src={sirVideo} type="video/mp4" />
                 আপনার ব্রাউজার ভিডিওটি সাপোর্ট করছে না।
